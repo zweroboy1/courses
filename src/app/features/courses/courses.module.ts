@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CoursesComponent } from './courses.component';
 import { CourseComponent } from "../course/course.component";
-import { ShakaPlayerComponent } from "../../shared/shaka-player/shaka-player.component";
 import { CoursesRoutingModule } from './courses-routing.module';
 import { NgbPaginationModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -10,13 +9,13 @@ import { NgbPaginationModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootst
 
 @NgModule({
   declarations: [
-    CoursesComponent, CourseComponent, ShakaPlayerComponent
+    CoursesComponent, CourseComponent
   ],
   imports: [
     CommonModule, NgbPaginationModule, NgbTypeaheadModule
   ],
   exports: [
-    CoursesComponent, CourseComponent, CoursesRoutingModule, NgbPaginationModule, NgbTypeaheadModule, ShakaPlayerComponent
+    CoursesComponent, CourseComponent, CoursesRoutingModule, NgbPaginationModule, NgbTypeaheadModule
   ]
 
 })
