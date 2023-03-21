@@ -7,7 +7,7 @@ interface Course {
   title?: string;
   description?: string;
   photo?: string;
-  video?: string
+  video?: string;
   lessonsCount?: number;
   tags?: Array<string>,
   rating?: number;
@@ -57,7 +57,9 @@ export class CourseComponent implements OnInit, AfterViewInit {
         this.course.video = data.meta.courseVideoPreview.link;
         this.course.lessonsCount = data.lessons.length;
         this.active = Array(data.lessons.length).fill(false);
-        this.initPlayer(this.course.video);
+        if (this.course.video) {
+          this.initPlayer(this.course.video);
+        }
         this.createLessonsLayout(data.lessons);
       }),
       take(1)
@@ -82,13 +84,12 @@ export class CourseComponent implements OnInit, AfterViewInit {
     if (shaka.Player.isBrowserSupported()) {
       this.videoElement = this.videoElementRef?.nativeElement;
       this.videoContainerElement = this.videoContainerRef?.nativeElement;
-
     } else {
       console.error('Browser not supported!');
     }
   }
 
-  private initPlayer(url: string | undefined) {
+  private initPlayer(url: string) {
 
     shaka.media.ManifestParser.registerParserByExtension("m3u8", shaka.hls.HlsParser);
     shaka.media.ManifestParser.registerParserByMime("Application/vnd.apple.mpegurl", shaka.hls.HlsParser);
@@ -102,12 +103,36 @@ export class CourseComponent implements OnInit, AfterViewInit {
       this.videoElement
     );
 
+    const config = {
+      'seekBarColors': {
+        base: 'rgba(55, 255, 255, 0.3)',
+        buffered: 'rgba(55, 255, 255, 0.54)',
+        played: 'rgb(55, 255, 255)',
+      },
+      'overflowMenuButtons': ['cast'],
+      'enableTooltips': true,
+      'playbackRates': [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      'fastForwardRates': [2, 4, 8, 1],
+      'rewindRates': [-1, -2, -4, -8]
+    }
+    ui.configure(config);
     this.loadVideo(url);
+    document.querySelector(".shaka-video")?.addEventListener("timeupdate", () => {
+      let time = Math.round(this.player.video_.currentTime) - 2;
+      time = time < 0 ? 0 : time;
+      localStorage.setItem(this.player.assetUri_, "" + time);
+    });
   }
 
-  loadVideo(url: string | undefined): void {
+  loadVideo(url: string): void {
+
+    let time = localStorage.getItem(url);
+    if (time === null) {
+      time = "0";
+    }
+
     this.player
-      .load(url, 0)
+      .load(url, +time)
       .then(() => {
         const textTracks = this.player.getTextTracks();
         if (textTracks.length > 0) {
@@ -115,6 +140,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
           this.player.selectTextTrack(textTracks[0]);
         }
         this.videoElement?.play();
+
       })
       .catch((e: any) => {
         console.error(e);
